@@ -1,0 +1,17 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install qlang
+        run: curl -fsSL https://raw.githubusercontent.com/quenti77/qlang/main/install.sh | sh
+      - run: ~/.local/bin/qlang fmt --check
+      - run: ~/.local/bin/qlang test
