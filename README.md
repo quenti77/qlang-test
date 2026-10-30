@@ -5,7 +5,7 @@ Tests that read like sentences, for [qlang](https://github.com/quenti77/qlang): 
 nothing else to install.
 
 ```
-qlang add test --git https://github.com/quenti77/qlang-test --tag v0.1.0
+qlang add test
 ```
 
 ```
