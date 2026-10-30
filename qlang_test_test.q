@@ -162,6 +162,7 @@ end
 fun test_snapshots_are_saved_then_compared()
   let dir = "/tmp/qlang-test-snapshots-{time.now()}"
   t.reset()
+  t.allow_new_snapshots(true)
   t.snapshot_dir(dir)
   t.test("shape", fun() t.expect(["a", "b"]).to_match_snapshot() end)
   assert_eq(quiet().passed, 1)
@@ -194,4 +195,15 @@ fun test_junit_and_tap_files_are_written()
   assert(text.contains("1..3"))
   assert(text.contains("not ok 2 - bad <one>"))
   assert(text.contains("ok 3 - skipped # SKIP"))
+end
+
+fun test_without_permission_a_missing_snapshot_fails_on_a_ci()
+  if (env.get("CI") ?? "") == "" then
+    return
+  end
+  t.reset()
+  t.allow_new_snapshots(false)
+  t.snapshot_dir("/tmp/qlang-test-none-{time.now()}")
+  t.test("new", fun() t.expect(1).to_match_snapshot() end)
+  assert_eq(quiet().failed, 1)
 end

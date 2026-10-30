@@ -92,6 +92,7 @@ struct Registry
   public running: string
   public snapshot_dir: string
   public snapshot_seen: int
+  public allow_new: bool
 end
 
 fun new_scope(name: string, parent: Scope?) -> Scope
@@ -100,7 +101,7 @@ end
 
 fun new_registry() -> Registry
   let root = new_scope("", none)
-  Registry { root: root, current: root, cases: [], tags: [], running: "", snapshot_dir: "__snapshots__", snapshot_seen: 0 }
+  Registry { root: root, current: root, cases: [], tags: [], running: "", snapshot_dir: "__snapshots__", snapshot_seen: 0, allow_new: false }
 end
 
 let registry = new_registry()
@@ -119,6 +120,12 @@ end
 --" Where the snapshots are kept (`__snapshots__` by default, from the folder `qlang test` runs in). --"
 fun snapshot_dir(path: string)
   registry.snapshot_dir = path
+end
+
+--" Saves a snapshot that does not exist yet even when `CI` is set (the default there is to fail, so
+that a forgotten snapshot is noticed). --"
+fun allow_new_snapshots(on: bool)
+  registry.allow_new = on
 end
 
 fun path_of(scope: Scope) -> array<string>
@@ -834,7 +841,7 @@ impl<T> Expectation<T>
     let update = (env.get("QLANG_UPDATE_SNAPSHOTS") ?? "") != ""
     let old = saved[key]
     if old == none then
-      if (env.get("CI") ?? "") != "" and not update then
+      if (env.get("CI") ?? "") != "" and not update and not registry.allow_new then
         fail("no snapshot saved for \"{key}\" (run the tests once without CI, or with QLANG_UPDATE_SNAPSHOTS=1)")
       end
       saved[key] = now
@@ -851,4 +858,4 @@ impl<T> Expectation<T>
   end
 end
 
-export Outcome, Summary, Options, Expectation, Spy, describe, test, it, skip, only, todo, group, it_with, before_all, after_all, before_each, after_each, run, run_with, finish, main, reset, snapshot_dir, expect, spy, fake0, fake1, fake2
+export Outcome, Summary, Options, Expectation, Spy, describe, test, it, skip, only, todo, group, it_with, before_all, after_all, before_each, after_each, run, run_with, finish, main, reset, snapshot_dir, allow_new_snapshots, expect, spy, fake0, fake1, fake2
