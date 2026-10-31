@@ -207,3 +207,31 @@ fun test_without_permission_a_missing_snapshot_fails_on_a_ci()
   t.test("new", fun() t.expect(1).to_match_snapshot() end)
   assert_eq(quiet().failed, 1)
 end
+
+-- A double of a trait: a struct that implements it and records its calls in a spy.
+trait Mailer
+  fun send(self, to: string) -> bool
+end
+
+struct FakeMailer
+  public calls: t.Spy
+  public works: bool
+end
+
+impl Mailer for FakeMailer
+  public fun send(self, to: string) -> bool
+    self.calls.calls.push(to)
+    self.works
+  end
+end
+
+fun welcome(m: Mailer, to: string) -> string
+  if m.send(to) then "sent" else "failed" end
+end
+
+fun test_a_trait_is_doubled_by_a_struct_with_a_spy()
+  let s = t.spy()
+  assert_eq(welcome(FakeMailer { calls: s, works: true }, "a@b.fr"), "sent")
+  assert_eq(welcome(FakeMailer { calls: s, works: false }, "x@y.com"), "failed")
+  t.expect(s).to_have_been_called_times(2).to_have_been_called_with("x@y.com")
+end
