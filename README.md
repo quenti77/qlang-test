@@ -54,7 +54,7 @@ The failure shows **the line of your test**, not a line of this library.
 | Cases | `test(name, f)`, `it(name, f)`, `describe(name, f)` (nested), `skip`, `only`, `todo(name)` |
 | Hooks | `before_all`, `after_all`, `before_each`, `after_each` (in a `describe`, or at the top) |
 | Datasets | `it_with("accepts %s", ["a@b.fr", "x@y.com"], fun(m: string) ... end)`: one case per element, named after it |
-| Groups | `group("slow", f)` tags the cases inside; `QLANG_TEST_GROUP=slow` runs those, `QLANG_TEST_SKIP_GROUP=slow` leaves them out |
+| Groups | `group("slow", f)` tags the cases inside; `qlang test --group slow` (qlang 0.72) or `QLANG_TEST_GROUP=slow` runs those, `--skip-group slow` / `QLANG_TEST_SKIP_GROUP=slow` leaves them out |
 | Matchers | `to_be`, `to_equal`, `to_be_greater_than`, `to_be_less_than`, `to_be_at_least`, `to_be_at_most`, `to_be_true`, `to_be_false`, `to_be_close_to`, `to_be_within`, `to_contain`, `to_have_length`, `to_be_empty`, `to_contain_text`, `to_start_with`, `to_end_with`, `to_match`, `to_be_none`, `to_be_some`, `to_be_ok`, `to_be_err`, `to_throw`, `to_throw_with`, `to_match_snapshot` |
 | Chaining | `expect(n).to_be_greater_than(1).to_be_less_than(10)`; `expect(n).never().to_be(3)` negates the next ones |
 | Spies | `let s = spy()`, `fake0(s, f)`, `fake1(s, f)`, `fake2(s, f)`; `expect(s).to_have_been_called_with("1, 2")` |
@@ -65,12 +65,46 @@ A failing case never stops the others: each one runs under `Panic.guard`, so a f
 `panic`, an `unwrap` of an error or an index out of range is reported against that case. Running out of
 steps (`--max-steps`) or memory still stops the run.
 
+## Test doubles for traits
+
+A double of a trait is a struct that implements it and records its calls in a `Spy`:
+
+```
+trait Mailer
+  fun send(self, to: string) -> bool
+end
+
+struct FakeMailer
+  public calls: t.Spy
+  public works: bool
+end
+
+impl Mailer for FakeMailer
+  public fun send(self, to: string) -> bool
+    self.calls.calls.push(to)
+    self.works
+  end
+end
+
+it("tells the user", fun()
+  let s = spy()
+  welcome(FakeMailer { calls: s, works: true }, "a@b.fr")
+  expect(s).to_have_been_called_with("a@b.fr")
+end)
+```
+
+There is no automatic fake of a trait: a qlang program cannot build a type at run time, so the small struct
+above is the way (it is also what you would read in a review).
+
+## Coverage
+
+`qlang test --coverage` (qlang 0.72) counts the lines of your source files that the tests ran, with the cases of
+this package like any other test (`qlang test --coverage-lcov c.info` writes LCOV). Line coverage only.
+
 ## Not there
 
-- **Coverage**: it needs the interpreter to count lines; not done.
-- **Test doubles for traits**: `fake0/1/2` replace functions you pass in; there is no automatic fake of a
-  trait implementation yet.
-- **Removing `fun test_...`**: they keep working, side by side with this package.
+- **Removing `fun test_...`**: they keep working, side by side with this package. Not deprecated: both styles
+  cost nothing to keep, and `qlang test` is how a project runs this package.
 
 ## Developing
 
