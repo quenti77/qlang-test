@@ -2,3 +2,7 @@
 name = "test"
 version = "0.2.0"
 main = "qlang_test.q"
+
+# the level of each file (see docs/stability.md of qlang)
+[stability]
+experimental = ["qlang_test.q"]

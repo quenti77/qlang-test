@@ -14,4 +14,5 @@ jobs:
       - name: Install qlang
         run: curl -fsSL https://raw.githubusercontent.com/quenti77/qlang/main/install.sh | sh
       - run: ~/.local/bin/qlang fmt --check
+      - run: ~/.local/bin/qlang lint --max-complexity 22
       - run: ~/.local/bin/qlang test
