@@ -379,7 +379,7 @@ end
 fun seconds(ms: int) -> string
   let rest = ms % 1000
   let padded = if rest < 10 then "00{rest}" elseif rest < 100 then "0{rest}" else "{rest}" end
-  "{ms div 1000}.{padded}"
+  "{ms // 1000}.{padded}"
 end
 
 fun junit_text(outcomes: array<Outcome>, ms: int) -> string
