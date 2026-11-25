@@ -66,7 +66,7 @@ steps (`--max-steps`) or memory still stops the run.
 
 ## Public surface
 
-Everything below is the contract (level **provisional** in 0.3, **stable** from 1.0): a name removed,
+Everything below is the contract (level **stable** since 1.0): a name removed,
 renamed or given another signature is a "Breaking" line in the [CHANGELOG](CHANGELOG.md). All of it exists
 since 0.1 unless the last column says otherwise. Anything that is not in these tables is internal.
 
