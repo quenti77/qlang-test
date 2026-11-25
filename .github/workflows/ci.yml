@@ -7,12 +7,17 @@ permissions:
   contents: read
 jobs:
   test:
-    name: Tests
+    name: Tests (qlang ${{ matrix.qlang }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        qlang: ["1.6.0", "latest"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install qlang
-        run: curl -fsSL https://raw.githubusercontent.com/quenti77/qlang/main/install.sh | sh
-      - run: ~/.local/bin/qlang fmt --check
-      - run: ~/.local/bin/qlang lint --max-complexity 22
+        run: curl -fsSL https://raw.githubusercontent.com/quenti77/qlang/main/install.sh | sh -s -- --version ${{ matrix.qlang }}
+      - if: matrix.qlang == 'latest'
+        run: ~/.local/bin/qlang fmt --check
+      - if: matrix.qlang == 'latest'
+        run: ~/.local/bin/qlang lint --max-complexity 22
       - run: ~/.local/bin/qlang test

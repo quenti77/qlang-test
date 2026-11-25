@@ -42,8 +42,7 @@ Cases: 1 passed, 1 failed (2 ms)
 ```
 
 `finish()` stops with an error when a case failed, which is what makes `qlang test` fail. Without
-`qlang test`, end the file with `main()` and `qlang run` it (exit code 1 on a failure). Needs qlang 0.68
-(`Panic.guard`).
+`qlang test`, end the file with `main()` and `qlang run` it (exit code 1 on a failure). Needs qlang 1.6 or later (`//`, `Panic.guard`); the CI runs the suite on 1.6 and on the latest release.
 
 The failure shows **the line of your test**, not a line of this library.
 
@@ -64,6 +63,53 @@ The failure shows **the line of your test**, not a line of this library.
 A failing case never stops the others: each one runs under `Panic.guard`, so a failed matcher, a
 `panic`, an `unwrap` of an error or an index out of range is reported against that case. Running out of
 steps (`--max-steps`) or memory still stops the run.
+
+## Public surface
+
+Everything below is the contract (level **provisional** in 0.3, **stable** from 1.0): a name removed,
+renamed or given another signature is a "Breaking" line in the [CHANGELOG](CHANGELOG.md). All of it exists
+since 0.1 unless the last column says otherwise. Anything that is not in these tables is internal.
+
+| Name | Signature | Since |
+| --- | --- | --- |
+| `describe` | `(name: string, body: fun())` | 0.1 |
+| `test`, `it`, `skip`, `only` | `(name: string, body: fun())` | 0.1 |
+| `todo` | `(name: string)` | 0.1 |
+| `group` | `(tag: string, body: fun())` | 0.1 |
+| `it_with` | `<T>(name: string, cases: array<T>, body: fun(T))` | 0.1 |
+| `before_all`, `after_all`, `before_each`, `after_each` | `(f: fun())` | 0.1 |
+| `expect` | `<T>(actual: T) -> Expectation<T>` | 0.1 |
+| `spy` | `() -> Spy` | 0.1 |
+| `fake0`, `fake1`, `fake2` | `<..., R>(s: Spy, f: fun(...) -> R) -> fun(...) -> R` | 0.1 |
+| `Spy` | `calls: array<string>`, `times() -> int`, `last() -> string?` | 0.1 |
+| `run` | `() -> Summary` | 0.1 |
+| `run_with` | `(options: Options) -> Summary` | 0.1 |
+| `finish`, `main` | `()` (see "Running" below) | 0.1 |
+| `Options` | `report: bool = true`, `junit: string = ""`, `tap: string = ""` | 0.1 |
+| `Summary` | `passed`, `failed`, `skipped`, `todo`, `ms`, `outcomes: array<Outcome>` | 0.1 |
+| `Outcome` | `path: array<string>`, `name`, `status` (`passed`, `failed`, `skipped`, `todo`), `ms`, `message`, `place` | 0.1 |
+| `snapshot_dir`, `allow_new_snapshots` | `(path: string)`, `(on: bool)` | 0.1 |
+| `Expectation<T>` | the matchers of the table above, and `never()` | 0.1 |
+| `reset` | `()` | **internal**: forgets every case; it is exported for the tests of this package |
+
+Environment variables: `QLANG_TEST_GROUP`, `QLANG_TEST_SKIP_GROUP`, `QLANG_TEST_JUNIT`, `QLANG_TEST_TAP`,
+`QLANG_UPDATE_SNAPSHOTS`, and `CI` (a missing snapshot fails).
+
+### Running
+
+`finish()` runs the cases and panics with `N case(s) failed` when one failed (the body of `fun test_suite()`
+for `qlang test`). `main()` runs them and exits with code 1 on a failure (`qlang run` a file that ends with it).
+
+### Report formats
+
+The keys below are fixed; a key may be added, never removed or renamed before 2.0.
+
+- **JUnit** (`QLANG_TEST_JUNIT`): `<testsuite name="qlang" tests failures skipped time>`, one
+  `<testcase classname name time>` per case (`classname` is the `describe` names joined with `.`), with a
+  `<failure message>` (the message, then the line of the test) or `<skipped message="skipped|todo"/>`. `time` is in seconds.
+- **TAP** (`QLANG_TEST_TAP`): `TAP version 13`, `1..N`, then `ok N - a > b > case` or `not ok N - ...`; a failure
+  adds a `---` block with `message:` and `at:`; a skipped case ends with `# SKIP`, a todo with `# TODO`.
+- **Text report**: for people, not promised: do not parse it.
 
 ## Test doubles for traits
 
