@@ -1,6 +1,6 @@
 [package]
 name = "test"
-version = "0.2.0"
+version = "0.2.1"
 main = "qlang_test.q"
 
 # the level of each file (see docs/stability.md of qlang)
