@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0
+
+Level **stable**: the public surface of the README (names, signatures, the keys of the JUnit and TAP reports) does not change without the deprecation cycle of qlang (two minor versions between the announcement and the removal). The code is the one of 0.3.0, which passed the qlang 1.12 release without a change.
+
+Breaking: none.
+
 ## 0.3.0
 
 The public surface is written down (see the README) and every name of it has a test. Level **provisional**:
