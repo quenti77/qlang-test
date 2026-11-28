@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+A description for the registry. Nothing changes in the code.
+
+- `qlang.toml` now has a **`description`**: `qlang search` and the packages site show it (the package had only its name).
+
 ## 1.0.0
 
 Level **stable**: the public surface of the README (names, signatures, the keys of the JUnit and TAP reports) does not change without the deprecation cycle of qlang (two minor versions between the announcement and the removal). The code is the one of 0.3.0, which passed the qlang 1.12 release without a change.
